@@ -34,6 +34,12 @@ from bs4 import BeautifulSoup
 import urllib
 import sys
 import glob
+from pathlib import Path
+
+######## Change this to change destination folder ##############
+######## Include trailing slash ################################
+folder = ''
+################################################################
 
 urladdress_init = "https://www.shapeways.com/designer/mz4250/creations"
 page_init = requests.get(urladdress_init)
@@ -48,59 +54,21 @@ for i in str(PagesNum[-1]).split(' '):
 
 index_list = [i*48 for i in range(0, maxPageNum)]
 
-#Change FilesList to path of 3Dfiles folder if 
-#it's not the same as the folder where the 
-#python script is stored.
-#E.g. '../figures/*.stl'
-
-FilesList = glob.glob('*.stl')
-
-new_finder = 0
-NewFigsList = []
-
 for j in index_list:
-	print float(j)/index_list[-1]    #This is just a progress tracker, remove if you find it annoying
 	urladdress = "https://www.shapeways.com/designer/mz4250/creations?s=%d#more-products" %j
 
 	page = requests.get(urladdress)
 	soup = BeautifulSoup(page.content, 'html.parser')
 
-	#Quite ugly code, but this was a part of my learning progress
-	# and if it works, why fix it?
+	#Simplified the scrapping process
+	figures = soup.findAll('div', {'class': 'product-info'})
 
-	body =  list((list(soup.children)[4]).children)[3]
-	a =  list(body.children)[3]
-
-	b =  list(a.children)[5]
-
-	c = list(b.children)[3]
-
-	#More elegant code below
-	figures = c.findAll('a', {'class': 'product-url'})
-
-	counter = 0
-	for i in range(0, len(figures)):
-		switch = 0
-		if counter == i/2.:
-			text = str(figures[i])
-			figureURL = ((text.split('href'))[1].split('&')[0])[2:]
-	 		fileURL = figureURL[:34] + 'download/' + figureURL[34:43]
-	 		filename = (figureURL[44:]).split('?')[0]
-
-	 		# print fileURL
-	 		# print figureURL
-	 		# print filename
-
-	 		for k in FilesList:
-	 			if k == (filename + '.stl'):
-	 				switch = 1
-	 		if switch != 1:
-	 			print "Found missing link!"
-	 			print filename
-
-	 			# This must be changed to download the files to a different folder.
-	 			# E.g. '../figures/*.stl'
-	 			urllib.urlretrieve(fileURL, '%s.stl' %filename)
-	 			NewFigsList.append(filename)
-	 			new_finder += 1
-			counter += 1
+	for figure in figures:
+		fileName = figure['title'] + '.stl'
+		fileURL = 'https://www.shapeways.com/product/download/' + figure['data-spin'] 
+		my_file = Path(folder + fileName)
+		if my_file.is_file():
+			print fileName + ' already exists.'
+		else:
+			urllib.urlretrieve(fileURL, folder + fileName)
+			print fileName + ' has been downloaded'
