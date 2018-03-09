@@ -65,18 +65,8 @@ for j in index_list:
 	page = requests.get(urladdress)
 	soup = BeautifulSoup(page.content, 'html.parser')
 
-	#Quite ugly code, but this was a part of my learning progress
-	# and if it works, why fix it?
-
-	body =  list((list(soup.children)[4]).children)[3]
-	a =  list(body.children)[3]
-
-	b =  list(a.children)[5]
-
-	c = list(b.children)[3]
-
-	#More elegant code below
-	figures = c.findAll('a', {'class': 'product-url'})
+	#Simplified the scrapping process
+	figures = soup.findAll('a', {'class': 'product-url'})
 
 	counter = 0
 	for i in range(0, len(figures)):
