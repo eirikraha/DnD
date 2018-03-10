@@ -64,7 +64,8 @@ for j in index_list:
 	figures = soup.findAll('div', {'class': 'product-info'})
 
 	for figure in figures:
-		fileName = figure['title'] + '.stl'
+		#Forward slashes are bad on unix filesystems, so remove them.
+		fileName = figure['title'].replace('/', '') + '.stl'
 		fileURL = 'https://www.shapeways.com/product/download/' + figure['data-spin'] 
 		my_file = Path(folder + fileName)
 		if my_file.is_file():
