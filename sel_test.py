@@ -67,9 +67,9 @@ from selenium.webdriver.common.keys import Keys
 import requests
 from bs4 import BeautifulSoup
 import urllib, urllib2
-import sys
-import glob
-import browsercookie
+#import sys
+#import glob
+#import browsercookie
 from pathlib import Path
 
 LoginURL = "https://www.shapeways.com/login"
@@ -83,12 +83,14 @@ driver.get(LoginURL)
 username = driver.find_element_by_id('login_username')
 password = driver.find_element_by_id('login_password')
 
-username.send_keys("UserNameHere")   #Write your username here!
-password.send_keys("PassWordHere")	 #Write your password here!
+username.send_keys("YourUsernameHere")   #Write your username here!
+password.send_keys("YourPasswordHere")	 #Write your password here!
 
 driver.find_element_by_id('sign_in_button').click()
 
 raw_input('Press enter to continue')    #The program will not continue until you press Enter
+print "Enter has been pressed"
+
 
 folder = 'C:/Users/Eirik/'
 
