@@ -127,5 +127,4 @@ if __name__ == '__main__':
 	SpellBook.addSpell('Vicious Mockery')
 	SpellBook.addSpell('Magic Missile')
 	SpellBook.addSpell('Resurrection')
-	SpellBook.addSpell('HomeMade', fromWeb = False)
 	SpellBook.createTXT('test.txt')
