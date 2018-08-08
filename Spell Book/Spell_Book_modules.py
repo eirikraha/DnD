@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from numpy import ceil
 
 class SpellBookCreator():
 
@@ -30,10 +31,22 @@ class SpellBookCreator():
 		#Finds the spell parameters and the spell description
 		spell_url_info = soup_spell.findAll('div', {'class': 'attrListItem row'})
 		spell_url_text = soup_spell.findAll('meta', {'name': 'description'})
+		spell_url_text2 = soup_spell.findAll('div', {'class': 'value'})[-1]  #possible better source of text
+		spell_url_text2 = (' '.join(((str(spell_url_text2).split('<div class="value">'))[1].split('<br>')))).split('</br>')[0]
+
+
+		if str(spell_url_text2)[-6:] == '</div>':
+				spell_url_text2 = str(spell_url_text2)[:-6]
 
 		#Initiates spell info dictionary
-		spell_info = {'Status': 'Idle'}  
-		spell_info.update({'Text': str(spell_url_text).split('"')[1]})   #Sets spell description
+		spell_info = {'Status': 'Idle'}
+		print (spell_url_text2, spell_url_text)
+		print (len(spell_url_text2), len(str(spell_url_text).split('"')[1]))  
+		if len(spell_url_text2) > len(str(spell_url_text).split('"')[1]):
+
+			spell_info.update({'Text': str(spell_url_text2)})
+		else:
+			spell_info.update({'Text': str(spell_url_text).split('"')[1]})   #Sets spell description
 
 		for i in spell_url_info:
 			classifier = i.findAll('div', {'class': 'col-md-3 attrName'})   #Finds parameter name
@@ -100,12 +113,105 @@ class SpellBookCreator():
 
 		(self.SpellBook[spellname])['Status'] = 'Idle'
 
-	def createPDF(self, rows = 2, columns = 2, height = 8.8, width = 6.3):
+	def createTEX(self, filename, rows = 2, columns = 2, height = 8.8, width = 6.3):
 		"""
 		Takes all the active and inactive spells, sorts them
-		after level and name and creates a printable spellbook.
+		after level and name and creates a printable spellbook using LaTeX.
 		Card dimensions are in cm and are set to pokémon card standard.
 		"""
+
+		file = open(filename + '.tex', 'w')
+		file.write('%s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n \n %s \n \n'
+					%('\\documentclass[a4paper,portrait]{article}',	
+					 '\\usepackage[margin=15mm]{geometry}',
+					 '\\usepackage[ngerman]{babel}',
+					 '\\usepackage{tikz}',
+					 '\\usepackage{pifont}',
+					 '\\usepackage{pifont}',
+					 '\\usepackage{graphicx}',
+					 '\\usepackage{adjustbox}',
+					 '\\input{tikz-lib}'))
+
+		file.write('%s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n \n%s \n' 
+					%('\\usepackage{geometry}',
+					  '\\geometry{',
+  					  'top=0.5in,',
+  					  'inner=0.1in,',
+  					  'outer=0.1in,',
+  					  'bottom=0.5in,',
+  					  'headheight=1ex,',
+  					  'headsep=1ex,}',
+  					  '\\setlength{\\tabcolsep}{0pt}',
+ 					  '\\begin{document} '))
+		spellcounter = 0
+
+		for i in self.SpellBook:
+			n = 70.
+			if (len(str(self.SpellBook[i]['Text']).split())) > n:
+				str_len = (len(str(self.SpellBook[i]['Text']).split()))
+				text_list = (str(self.SpellBook[i]['Text']).split())
+
+				for j in range(0, int(ceil(str_len/n))):
+					if spellcounter == 3 or spellcounter == 6 or spellcounter == 9:
+						file.write('%s' 
+						%('\\\\ \n'))
+					elif spellcounter == 0:
+						file.write('\\begin{tabular}{c c c} \n')
+					else:
+						file.write('& \n')
+
+					file.write('%s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n\n' 
+					%('\\begin{tikzpicture}',
+					  '\\SetBackground{spellbkg.jpg}',
+					  '\\SetTitle{%s (%d/%d)}' %(self.SpellBook[i]['Name'], j+1, int(ceil(str_len/n))),
+					  '\\SetCastingTime{%s}' %self.SpellBook[i]['Casting Time'],
+					  '\\SetRange{%s}' %self.SpellBook[i]['Range'],
+					  '\\SetComponents{%s}' %self.SpellBook[i]['Components'],
+					  '\\SetDuration{%s}' %self.SpellBook[i]['Duration'],
+					  '\\SetText{%s}' %' '.join(text_list[int(ceil(((j)/int(ceil(str_len/n)) * str_len))):int(ceil(((j+1)/int(ceil(str_len/n)) * str_len)))]),
+					  '\\end{tikzpicture}'
+					  ))
+					spellcounter += 1
+
+					if spellcounter == 9:
+						file.write('%s \n %s \n' 
+								 %('\\end{tabular}', '\\\\'))
+
+						spellcounter = 0
+
+			else:
+				if spellcounter == 3 or spellcounter == 6 or spellcounter == 9:
+					file.write('%s' 
+						%('\\\\ \n'))
+				elif spellcounter == 0:
+					file.write('\\begin{tabular}{c c c} \n')
+				else:
+					file.write('& \n')
+
+				file.write('%s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n %s \n\n' 
+						%('\\begin{tikzpicture}',
+						  '\\SetBackground{spellbkg.jpg}',
+						  '\\SetTitle{%s}' %self.SpellBook[i]['Name'],
+						  '\\SetCastingTime{%s}' %self.SpellBook[i]['Casting Time'],
+						  '\\SetRange{%s}' %self.SpellBook[i]['Range'],
+						  '\\SetComponents{%s}' %self.SpellBook[i]['Components'],
+						  '\\SetDuration{%s}' %self.SpellBook[i]['Duration'],
+						  '\\SetText{%s}' %self.SpellBook[i]['Text'],
+						  '\\end{tikzpicture}'
+						  ))
+
+				spellcounter += 1
+
+				if spellcounter == 9:
+					file.write('%s \n %s \n' 
+						%('\\end{tabular}', '\\\\'))
+
+					spellcounter = 0
+		if spellcounter != 0:
+			file.write('\\end{tabular} \n')
+		file.write('\\end{document}')
+
+
 
 	def createTXT(self, filename):
 		"""
@@ -125,7 +231,13 @@ class SpellBookCreator():
 if __name__ == '__main__':
 	SpellBook = SpellBookCreator('Spell Book')
 	SpellBook.addSpell('Vicious Mockery')
-	SpellBook.addSpell('Magic Missile')
-	SpellBook.addSpell('Resurrection')
-	SpellBook.addSpell('HomeMade', fromWeb = False)
-	SpellBook.createTXT('test.txt')
+	SpellBook.addSpell('Light')
+	SpellBook.addSpell('Prestidigitation')
+	SpellBook.addSpell('Charm Person')
+	SpellBook.addSpell('Healing Word')
+	SpellBook.addSpell('Identify')
+	SpellBook.addSpell('Thunderwave')
+	SpellBook.addSpell('Detect Thoughts')
+	SpellBook.addSpell('Invisibility')
+	#SpellBook.addSpell('Phantasmal Force')
+	SpellBook.createTEX('Odd Spell Book lvl 4')
