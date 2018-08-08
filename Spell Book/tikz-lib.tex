@@ -1,0 +1,97 @@
+\pgfmathsetmacro{\cardroundingradius}{4mm}
+\pgfmathsetmacro{\striproundingradius}{3mm}
+\pgfmathsetmacro{\cardwidth}{6.3}
+\pgfmathsetmacro{\cardheight}{8.8}
+\newcommand{\stripcolor}{cyan}
+\pgfmathsetmacro{\stripwidth}{0}
+\pgfmathsetmacro{\strippadding}{0}
+\pgfmathsetmacro{\imagewidth}{\cardwidth}
+
+\pgfmathsetmacro{\titlewidth}{0.215*\cardwidth}
+\pgfmathsetmacro{\titleheight}{1.01*\cardheight}
+
+
+
+\newcommand{\striptext}{INTER ARMA \rotatebox[origin=c]{-90}{\ding{49}}}
+\pgfmathsetmacro{\textpadding}{0.3}
+\newcommand{\titlecaption}{LATIN}
+\newcommand{\topcontent}{\textit{''Inter Arma Enim Silent Leges''}}
+\newcommand{\bottomcaption}{Inter Arma}
+\newcommand{\bottomcontent}{In times of war, the law falls silent.\\ \tikz{\fill[even odd rule] (0,0) circle (0.3) (-0.2,-0.2) rectangle (0.2,0.2);}}
+\pgfmathsetmacro{\ruleheight}{0.1}
+\newcommand{\stripfontsize}{\Huge}
+\newcommand{\captionfontsize}{\LARGE}
+\newcommand{\textfontsize}{\large}
+\newcommand{\titlefontsize}{\large}
+
+\newcommand{\adjsizetonode}{%
+  \adjustbox{varwidth={5cm}\centering,keepaspectratio,max size={.9\dimexpr\pgfkeysvalueof{/pgf/minimum width}\relax}{.9\dimexpr\pgfkeysvalueof{/pgf/minimum height}\relax}}%
+}
+
+
+\def\shapeCard{(0,0) rectangle (\cardwidth,\cardheight)}
+
+\tikzset{
+    %   runde Ecken für die Karten
+    cardcorners/.style={
+        rounded corners=0.2cm
+    },
+	%   Bild für das Kartenmotiv
+    cardimage/.style={
+        path picture={
+            \node[below=-1.5mm] at (0.5*\cardwidth,\cardheight) {
+                \includegraphics[width=\imagewidth cm]{#1}
+            };
+        }
+    },
+}
+
+\newcommand{\CreateCard}{\draw[rounded corners=\cardroundingradius] (0,0) rectangle (\cardwidth,\cardheight);}
+
+\newcommand{\SetBackground}[1]{\draw[cardcorners, cardimage=#1] \shapeCard;}
+
+\newcommand{\SetTitle}[1]{
+\node[text width=3.75cm, below right, inner sep=0] at (\titlewidth, \titleheight)
+    {   \begin{center}
+    		{#1}
+		\end{center}     };
+}
+
+\newcommand{\SetCastingTime}[1]{
+\node[text width=3.75cm, below right, inner sep=0] at (-0.14*\titlewidth, 0.878*\titleheight)
+    {   \begin{center}
+    		{#1}
+		\end{center}     };
+}
+
+\newcommand{\SetRange}[1]{
+\node[text width=3.75cm, below right, inner sep=0] at (2.0*\titlewidth, 0.878*\titleheight)
+    {   \begin{center}
+    		{#1}
+		\end{center}     };
+}
+
+\newcommand{\SetComponents}[1]{
+\node[text width=2.5cm, below right, inner sep=0] at (0.35*\titlewidth, 0.785*\titleheight)
+    {   \begin{center}
+    		{#1}
+		\end{center}     };
+}
+
+\newcommand{\SetDuration}[1]{
+\node[text width=3.75cm, below right, inner sep=0] at (2.0*\titlewidth, 0.785*\titleheight)
+    {   \begin{center}
+    		{#1}
+		\end{center}     };
+}
+
+\newcommand{\Set}{•}
+
+\newcommand{\SetText}[1]{
+%\tikzstyle{D}=[shape=rectangle, draw, line width = 0.2pt, minimum width=5.7cm,   minimum height=2.7cm,inner sep = 0pt]
+\tikzstyle{D}=[shape=rectangle, minimum width=5.7cm,   minimum height=2.7cm,inner sep = 0pt]
+
+
+\node[D] at (0.5*\cardwidth, 0.36*\cardheight)
+    {\adjsizetonode{#1} };
+}
